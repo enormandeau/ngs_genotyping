@@ -1,6 +1,6 @@
 #!/bin/bash
 # Create blast database
-evalue="50"
+evalue="126"
 maxnum=`grep ">" allele_database.fasta | sed -E 's/[^0-9]*//g' | sort -n | tail -1`
 database_file="allele_database.fasta"
 database_title="allele_database"
