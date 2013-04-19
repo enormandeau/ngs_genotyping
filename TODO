@@ -1,6 +1,8 @@
 - Pipeline
     - All installation at step 0
     - Implement step 4.5 in step 4
+    - Implement step 2 with scripts
+    - Simplify everything that is possible (create scripts for each step)
     - Rename folders by steps (eg: 00_raw_data)
 
 - HIGGY_Pop
@@ -10,9 +12,12 @@
     - Improve messages and reporting
 
 - Documentation
+    - Revise for typos and possible improvements
     - Describe potential error message in HIGGY_Pop and fix
 
 - Tests
     - Implement testing suite
     - Run through the whole pipeline with default values
     - Check for bugs and crashes
+    - Run test before releases
+
