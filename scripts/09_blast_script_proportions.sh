@@ -1,6 +1,6 @@
 #!/bin/bash
 # Create blast database
-evalue="126"
+evalue="125"
 maxnum=`grep ">" allele_database.fasta | sed -E 's/[^0-9]*//g' | sort -n | tail -1`
 database_file="allele_database.fasta"
 database_title="allele_database"
@@ -38,5 +38,5 @@ grep ">" allele_database.fasta | sed -E 's/>(A_[0-9]+).+?$/\1/; s/>//' | while r
 grep ">" allele_database.fasta | sed -E 's/>(A_[0-9]+).+?$/\1/; s/>//' | while read allele; do echo START $allele; for ind in $(grep " $allele$" ./individual_summary/*summary.proportions | perl -pe 's/:/ /' | sort -t " " -k 2 -nr | perl -pe 's/ .+//'); do echo $ind; cat $ind; done; done > individual_summaries_combined.txt
 
 # Create list of filenames for the .proportions files
-ls -1 individual_summary/*cleaned_aligned*.proportions > summary_file_names_proportions.txt
+ls -1 individual_summary/*summary.proportions > summary_file_names_proportions.txt
 
