@@ -1,10 +1,7 @@
-- Repository
-    -Add version tag
-
 - Pipeline
     - All installation at step 0
-    - Rename folders by steps (eg: 00_raw_data)
     - Implement step 4.5 in step 4
+    - Rename folders by steps (eg: 00_raw_data)
 
 - HIGGY_Pop
     - Do not ask for paths
