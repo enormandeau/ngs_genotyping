@@ -1,14 +1,14 @@
 #!/bin/bash
 # Create blast database
-evalue="50"
+evalue=$1
 maxnum=`grep ">" allele_database.fasta | sed -E 's/[^0-9]*//g' | sort -n | tail -1`
 database_file="allele_database.fasta"
 database_title="allele_database"
 sed -i -E 's/\-//g' $database_file
 
 # Empty result folders
-rm ./blast_results/*
-rm ./individual_summary/*
+rm ./blast_results/* 2> /dev/null
+rm ./individual_summary/* 2> /dev/null
 
 # Remove dashes '-' from fasta sequences
 sed -i -E 's/\-//g' *.fasta

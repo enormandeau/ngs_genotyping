@@ -8,7 +8,7 @@ SNPS=$2
 TEMP_FILE="clean_align_clean.temp"
 
 # Help
-echo "----------------------------------------------------------"
+echo "---"
 echo "Help for program 05_align_clean_align.sh"
 echo
 echo "Usage:"
@@ -19,7 +19,7 @@ echo "  SNPS = Decimal number, minimal proportion for SNPs to be considered real
 echo
 echo "Example run:"
 echo "  ./scripts/05_align_clean_align.sh 0.01 0.01"
-echo "----------------------------------------------------------"
+echo "---"
 
 # Create list of files to treat
 ls -1 trimmed_separated_sequences/*MID*.fasta > $TEMP_FILE

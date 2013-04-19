@@ -1,14 +1,14 @@
 #!/bin/bash
 # Create blast database
-evalue="125"
+evalue=$1
 maxnum=`grep ">" allele_database.fasta | sed -E 's/[^0-9]*//g' | sort -n | tail -1`
 database_file="allele_database.fasta"
 database_title="allele_database"
 sed -i -E 's/\-//g' $database_file
 
 # Empty result folders
-rm ./blast_results/*
-rm ./individual_summary/*
+rm ./blast_results/* 2> /dev/null
+rm ./individual_summary/* 2> /dev/null
 
 # Remove dashes '-' from fasta sequences
 sed -i -E 's/\-//g' *.fasta
@@ -23,7 +23,7 @@ for file in `ls -1 fasta/*.fasta | sed -E 's/^.+\///'`; do blastn -db ./blast_da
 for file in `ls -1 blast_results/* | sed -E 's/^.+\///'`; do awk 'BEGIN {FS="\t"} {print $2}' blast_results/$file; done | sort | uniq -c | sort -nr > summary_all.txt
 
 # Create threshold file
-grep ">" allele_database.fasta | sed -E 's/>(A_[0-9]+).+?$/\1/; s/>//' | while read i; do echo -e "0.001\t$i"; done > individual_thresholds.txt
+grep ">" allele_database.fasta | sed -E 's/>(A_[0-9]+).+?$/\1/; s/>//' | while read i; do echo -e "0.1\t$i"; done > individual_thresholds.txt
 
 # Figures of the distribution of evalues of the blasts on each allele
 grep ">" allele_database.fasta | sed -E 's/>(A_[0-9]+).+?$/\1/; s/>//' | while read i; do cat ./blast_results/*.blast | grep "$i[^0-9]" | awk '{print $11}' | sed -E 's/[0-9]e\-//' | sort -g | uniq -c > ./blast_results/data_$i; ./scripts/plot2lines.sh ./blast_results/data_$i; done

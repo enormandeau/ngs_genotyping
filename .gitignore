@@ -1,4 +1,7 @@
-*.odt
-*~
-*.swp
+*private*
 *test*
+*.swp
+*.odt
+*.fas
+*.fasta
+*~
