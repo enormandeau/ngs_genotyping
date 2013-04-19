@@ -1,0 +1,12 @@
+NGS_GENOTYPING CHANGELOG
+
+
+Version 0.9.1 beta
+------------------
+2013-04-19 Improvement: Simplified documentation
+2013-04-19 Feature: Added sub-sampling for individuals with too many sequences
+
+Version 0.9.0 beta
+------------------
+2013-04-18 Feature: First public beta version
+

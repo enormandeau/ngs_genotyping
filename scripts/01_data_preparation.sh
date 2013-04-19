@@ -6,7 +6,7 @@ MIDNAMES="trimmed_separated_sequences/midnames.txt"
 rm raw_data/*identified* 2> /dev/null
 
 # Renaming the sequences with the MIDs
-echo "Renaming the sequences..."
+echo "Renaming sequences..."
 echo "" > $MIDNAMES  # Create file containing the names of the MIDs
 for file in `ls -1 raw_data/*MID*.fna | sed 's/fna//'`; do  \
     mid=`echo $file | perl -pe 's/.*([0-9]{2})\.(MID[0-9]*).*/\2-\1/'`; \
@@ -31,9 +31,9 @@ rm raw_data/all_identified.fna.unwrap
 
 # Plot graph of sequence lengths
 echo "
-Examine the distribution of sequence lengths to evaluate the quality of
-your reads and the threshold that should be applied to remove reads that are
-either too short or too long.
+Examine the distribution of sequence lengths from the gnuplot graph to decide on
+the minimal and maximal length thresholds that should be applied to remove reads
+that are either too short or too long.
 
 If you want to look at the graph again without running the whole script, type
 the followint command in the terminal:

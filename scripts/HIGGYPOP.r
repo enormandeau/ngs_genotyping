@@ -1,63 +1,55 @@
-## Information about the programm ##
+# Information about the program
 cat("\n")
-cat("HIGGY_Pop Version 1.5","\n")
-cat("can you feeeeeeeeeeeeeeeeeel it?\n")
-cat("Haplotype Inference and GenotypinG Yn Population Samples with Individual Barcodes","\n")
-cat("By Pierre-Alexandre Gagnaire","\n","\n")
+cat("HIGGYPOP Version 1.6","\n")
+cat("Haplotype Inference and GenotypinG Yn POPulation samples with individual barcodes","\n")
 
-cat("Depends on the following packages: gee, ape, sequinr","\n")
+cat("HIGGYPOP depends on the following packages: gee, ape, sequinr","\n")
 
-## Loads R packages gee et ape for sequence analysis ##
+# Loads R packages gee et ape for sequence analysis
 library(gee, warn.conflicts = FALSE)
 library(ape, warn.conflicts = FALSE)
 library(seqinr, warn.conflicts = FALSE)
 
-####################################################################################################
-## The "divide" function splits the dendrogram obtained from the distance matrix at its deepest   ##
-## node and returns a list of two distance matrices corresponding to the two subtrees obtained.   ##
-## If a subtree contains a proportion of the total number of individual reads which is below the  ##
-## threshold value "Th", a 0 is stored in the list instead of the distance matrix. If the deepest ##
-## branch of the dendrogram to split is shorter than threshold "Ac", the original matrix is kept. ##
-####################################################################################################
-
 divide <- function(d,Th,Ac)
+# The "divide" function splits the dendrogram obtained from the distance matrix at its deepest 
+# node and returns a list of two distance matrices corresponding to the two subtrees obtained.
+# If a subtree contains a proportion of the total number of individual reads which is below the 
+# threshold value "Th", a 0 is stored in the list instead of the distance matrix. If the deepest
+# branch of the dendrogram to split is shorter than threshold "Ac", the original matrix is kept.
 	{
-	## "hcw" stores the result of hierarchical clustering based on Ward's minimum variance method ##
+	# "hcw" stores the result of hierarchical clustering based on Ward's minimum variance method
 	hcw <- hclust(d,method="ward")
-	## A cluster membership is assigned to each sequence ##
+	# A cluster membership is assigned to each sequence
 	memb <- cutree(hcw,k=2)
 	L <- list(names(memb[memb==1]),names(memb[memb==2]))
-	## The two distance matrices in the output are first defined as zero ##
+	# The two distance matrices in the output are first defined as zero
 	d1 <- 0
 	d2 <- 0
-	## If the dendrogram to be divided only consists of closely related sequences, then the ##
-	## original distance matrix is kept if it contains a sufficent proportion of the reads. ##
-	## This corresponds in the dendrogram to a branch that contains a collection of reads   ##
-	## from a single allele, plus eventual reads containing a few seqeuncing errors.        ##
+	# If the dendrogram to be divided only consists of closely related sequences, then the
+	# original distance matrix is kept if it contains a sufficent proportion of the reads.
+	# This corresponds in the dendrogram to a branch that contains a collection of reads
+	# from a single allele, plus eventual reads containing a few seqeuncing errors.
 	if ((length(d)/N) >= Th & max(hcw$height) <= Ac)
 		{d1 <- d}
-	## If the dendrogram is divided into two sub-trees, the distance matrix of the first    ##
-	## sub-tree is stored in "d1" if it contains a sufficent proportion of related reads.   ##
+	# If the dendrogram is divided into two sub-trees, the distance matrix of the first
+	# sub-tree is stored in "d1" if it contains a sufficent proportion of related reads.
 	if (((length(L[[1]]))/N) >= Th & max(hcw$height) > Ac)
 		{d1 <- as.dist((Matrix_dist)[L[[1]],L[[1]]], diag = FALSE, upper = FALSE)}
-	## Same thing for the distance matrix of the second sub-tree, stored in "d2" ##
+	# Same thing for the distance matrix of the second sub-tree, stored in "d2"
 	if (((length(L[[2]]))/N) >= Th & max(hcw$height) > Ac)
 		{d2 <- as.dist((Matrix_dist)[L[[2]],L[[2]]], diag = FALSE, upper = FALSE)}
-	## The outpout is a list of two distance matrices: either the original distance matrix  ##
-	## and the zero matrix, the original matrix without its deepest branch containing       ##
-	## errors and the zero matrix, or two non-null matrices obtained by spitting the input  ##
-	## distance matrix.                                                                     ##
+	# The outpout is a list of two distance matrices: either the original distance matrix
+	# and the zero matrix, the original matrix without its deepest branch containing
+	# errors and the zero matrix, or two non-null matrices obtained by spitting the input
+	# distance matrix.
 	list(d1,d2)
 	}
 
-############################################################################
-## The "Reduc" function takes a list containg non-zero distance matrices  ##
-## and zero distance matrices and returns a list from which zero distance ##
-## matrices have been removed. This function cleans the output from the   ##
-## "divide" function in order to save computation time.                   ##
-############################################################################
-
 Reduc <- function(A)
+# The "Reduc" function takes a list containg non-zero distance matrices
+# and zero distance matrices and returns a list from which zero distance
+# matrices have been removed. This function cleans the output from the
+# "divide" function in order to save computation time.
 	{
 	Clst = NULL
 	for (j in 1:length(A))
@@ -69,20 +61,17 @@ Reduc <- function(A)
 	Clst
 	}
 
-############################################################################
-## The "ColLab" function colors the leaves of an individual dendrogram to ##
-## show the leaves that were assigned to clusters and those that were     ##
-## rejected by the algorithm.                                             ##
-############################################################################
-
 ColLab <- function(DEND)
+# The "ColLab" function colors the leaves of an individual dendrogram to
+# show the leaves that were assigned to clusters and those that were
+# rejected by the algorithm.
 	{
 	if(is.leaf(DEND))
 		{
 		At <- attributes(DEND)
-		## Starts by setting the grey color to each leaf ##
+		# Starts by setting the grey color to each leaf
 		attr(DEND, "nodePar") <- c(At$nodePar, list(lab.col = "transparent", lab.cex=0.4, col="grey", pch=16, cex=0.5))
-		## And then gives a different color to the leaves that belong to each cluster ##
+		# And then gives a different color to the leaves that belong to each cluster
 		Paltette = rainbow(Nclt)
 		for (p in 1:Nclt)
 			{
@@ -95,25 +84,23 @@ ColLab <- function(DEND)
 	DEND
 	}
 
-## Asks for choosing between Phase 1 and phase 2 ##
+# Asks for choosing between Phase 1 and phase 2
 cat("\n")
-cat("Enter 1 to perform phase 1 (allele detection from individual reads)","\n")
-cat("Enter 2 to perform phase 2 (individual genotypes detection from phase 1 output)","\n")
-cat("(1/2)","\n")
+cat("Enter 1 to perform phase 1: allele detection from individual reads\n")
+cat("Enter 2 to perform phase 2: individual genotypes detection from phase 1 output)\n")
+cat("(1/2)\n")
 Phase <- readLines(n=1)
 if(Phase==1)
 	{
-	####################################################################################################
-	## PROMPTS THE USER TO SPECIFY THE FOLDER TO UPLOAD AND CHOOSE PARAMETER VALUES FOR THE ANALYSIS  ##
-	####################################################################################################
+	# Prompts the user to specify the folder to upload and choose parameter values for the analysis
 	cat("Phase 1: detecting alleles from individual reads","\n")
-	## Prompts for the full path of the folder where individual fasta files have been stored ##
+	# Prompts for the full path of the folder where individual fasta files have been stored
 	cat("\n")
 	cat("Enter the full path of the folder containing individual fasta files","\n")
 	Path <- readLines(n=1)
 	setwd(Path)
 
-	## Asks the user to check if the number of individual fasta files detected is correct ## 
+	# Asks the user to check if the number of individual fasta files detected is correct
 	List_fasta <- list.files(Path)
 	cat(paste("Number of individual fasta files = ",length(List_fasta),"\n"))
 	cat("Is this correct?","\n")
@@ -124,21 +111,21 @@ if(Phase==1)
 	if(answer1=="y")
 	{cat("Starting phase 1: Identification of individual sequence clusters","\n")
 
-	## Prompts for the internal branch length parameter value. A value of 0.06 will be OK in most of  ##
-	## the cases to distinguish alleles from sequencing errors. A lower value will result in a higher ##
-	## rate of exclusion of reads containing sequencing errors, and an increased power to distinguish ##
-	## closely related alleles that differ from a single base mutation.                               ##
+	# Prompts for the internal branch length parameter value. A value of 0.06 will be OK in most of
+	# the cases to distinguish alleles from sequencing errors. A lower value will result in a higher
+	# rate of exclusion of reads containing sequencing errors, and an increased power to distinguish
+	# closely related alleles that differ from a single base mutation.
 	cat("Choose internal branch length parameter for sequence cluster discrimination","\n")
 	cat("(e.g. 0.06)","\n")
 	Ac <- as.numeric(readLines(n=1))
 	}
 
-	## Asks the user to choose between an automated and a manual version of phase 1. In the automated ##
-	## version, the entered Ac parameter value is used for each individual, the number of clusters is ##
-	## automatically detected and each cluster's consensus sequence is exported for each individual.  ##
-	## In the manual version, an automatic detection of cluster is also performed in a first step,    ##
-	## but the user may decide to change the internal branch length parameter value and the minimal   ##
-	## amount of sequences in each cluster after looking at the results.                              ##
+	# Asks the user to choose between an automated and a manual version of phase 1. In the automated
+	# version, the entered Ac parameter value is used for each individual, the number of clusters is
+	# automatically detected and each cluster's consensus sequence is exported for each individual.
+	# In the manual version, an automatic detection of cluster is also performed in a first step,
+	# but the user may decide to change the internal branch length parameter value and the minimal
+	# amount of sequences in each cluster after looking at the results.
 	cat("Check clustering for each individual before exporting consensus sequences?","\n")
 	cat("Enter y if you want to have a full control for each individual","\n")
 	cat("Enter n if you want to perform automatic clustering (large datasets)","\n")
@@ -147,32 +134,32 @@ if(Phase==1)
 	if(answer2=="n")
 		{
 		cat("Starting automatic clustering and exporting individual consensus sequences","\n","\n")
-		## For each individual having a 'fasta' file in the folder, the number of sequence clusters is ##
-		## determined and stored in NCLUST, and added to LCLUST which stores the number of clusters of ##
-		## each indivudual in the order the are called.                                                ##
+		# For each individual having a 'fasta' file in the folder, the number of sequence clusters is
+		# determined and stored in NCLUST, and added to LCLUST which stores the number of clusters of
+		# each indivudual in the order the are called.
 		LCLUST <- NULL
 		cat("Enter minimal proportion of sequences to define a cluster","\n")
 		sequ_min <- as.numeric(readLines(n=1))
-		#cat("Enter MAXIMAL proportion of sequences to define a cluster","\n")
+		# cat("Enter MAXIMAL proportion of sequences to define a cluster","\n")
 		sequ_max <- sequ_min
 		sequ = seq(sequ_min,sequ_max,0.01)
 		for (l in 1:(length(List_fasta)))
 			{
-			## Loads the fasta alignment of individual "l" ##
+			# Loads the fasta alignment of individual "l"
 			input.aln <- read.dna(file=List_fasta[l], format = "fasta")
 			cat("Now processing file", List_fasta[l], "\n")
-			## Computes all pairwise raw distances and places them into a distance matrix ##
+			# Computes all pairwise raw distances and places them into a distance matrix
 			Matrix_dist <- (dist.dna(input.aln, model = "raw", as.matrix = TRUE, pairwise.deletion = FALSE))
-			## Makes a lower triangular distance matrix of class 'dist' ##
+			# Makes a lower triangular distance matrix of class 'dist' # 
 			d <- as.dist(Matrix_dist, diag = FALSE, upper = FALSE)
-			## Performs one step of hierarchical clustering based on Ward's minimum variance method ##
+			# Performs one step of hierarchical clustering based on Ward's minimum variance method
 			HCW <- hclust(d,method="ward")
 			DEND <- as.dendrogram(HCW)
 			NCLUST <- NULL
-			## Explores the number of retained clusters as a function of the amount of sequence data in each cluster ##
+			# Explores the number of retained clusters as a function of the amount of sequence data in each cluster
 			for (Thr1 in sequ)
 				{
-				#Thr1 <- seq(0.01,0.5,0.01)[k]
+				# Thr1 <- seq(0.01,0.5,0.01)[k]
 				N <- length(colnames(Matrix_dist))
 				W <- list(d,divide(d,Thr1,Ac))
 				S <- length(unlist(W[[1]]))
@@ -310,7 +297,7 @@ if(Phase==1)
 			dend_colored <- dendrapply(DEND,ColLab)
 			plot(dend_colored, xlab=paste("Automatically generated dendrogram of individual",Prefix))
 			cat(paste("Detecting",Nclt,"clusters in individual",Prefix,"\n"))
-			## Prompts to check the graphical output ##
+			# Prompts to check the graphical output
 			cat("Accept clustering?","\n")
 			cat("(y/n)","\n")
 			answer3 <- readLines(n=1)
@@ -359,7 +346,7 @@ if(Phase==1)
 				dend_colored <- dendrapply(DEND,ColLab)
 				plot(dend_colored, xlab=paste("New dendrogram of individual",Prefix))
 				cat(paste("Now detecting",Nclt,"clusters in individual",Prefix,"\n"))
-				## Prompts to check the graphical output ##
+				# Prompts to check the graphical output
 				cat("Accept clustering?","\n")
 				cat("(y/n)","\n")
 				answer3 <- readLines(n=1)
@@ -372,11 +359,9 @@ if(Phase==1)
 
 if(Phase==2)
 	{
-	#######################################################################################################################
-	## PROMPTS THE USER TO SPECIFY THE PLACE OF THE FILE CONTAINING AN ALIGNMENT OF THE CONSENSUS SEQUENCES FROM PHASE 1 ##
-	#######################################################################################################################
+	# Prompts the user to specify the path of the file containing an alignment of the consensus sequences from phase 1
 	cat("Phase 2: detecting individual genotypes","\n")
-	## Prompts for the full path of the folder where the fasta alignment has been stored ##
+	# Prompts for the full path of the folder where the fasta alignment has been stored
 	cat("\n")
 	cat("Enter the full path of the folder containing the fasta alignment","\n")
 	Path <- readLines(n=1)
@@ -389,10 +374,10 @@ if(Phase==2)
 	NI <- unique(gsub(pattern = "_.+",replacement = "", x=colnames(Matrix_dist)))
 	cat(paste("Detecting",length(NI),"individuals in the alignment:"),"\n")
 	print(NI)
-	## Performs one step of hierarchical clustering based on Ward's minimum variance method ##
+	# Performs one step of hierarchical clustering based on Ward's minimum variance method
 	HCW <- hclust(d,method="ward")
 	DEND <- as.dendrogram(HCW)
-	## Prompts for internal branch length parameter and minimal allele counts ##
+	# Prompts for internal branch length parameter and minimal allele counts
 	cat("Enter the internal branch length parameter value","\n")
 	cat("(e.g. 0.06)","\n")
 	Ac <- as.numeric(readLines(n=1))
@@ -439,7 +424,7 @@ if(Phase==2)
 			}
 		dend_colored <- dendrapply(DEND,ColLab)
 		plot(dend_colored, xlab=paste("dendrogram of",Nclt,"retained alleles, each found in at least",NMIN,"individuals"))
-	## Prompts to check the graphical output ##
+	# Prompts to check the graphical output
 	cat("Accept clustering?","\n")
 	cat("(y/n)","\n")
 	answer4 <- readLines(n=1)
@@ -489,7 +474,7 @@ if(Phase==2)
 		dend_colored <- dendrapply(DEND,ColLab)
 		plot(dend_colored, xlab=paste("dendrogram of",Nclt,"retained alleles, each found in at least",NMIN2,"individuals"))
 		cat(paste("Now detecting",Nclt,"alleles in",length(NI),"individuals"),"\n")
-		## Prompts to check the graphical output ##
+		# Prompts to check the graphical output
 		cat("Accept clustering?","\n")
 		cat("(y/n)","\n")
 		answer4 <- readLines(n=1)
@@ -497,7 +482,7 @@ if(Phase==2)
 	print(data.frame(Genotypes))
 	output_file = paste("genotypes_B", as.character(Ac), "_N", as.character(NMIN), "_", format(Sys.time(), "%Y-%m-%d"), ".txt")
 	output_file = gsub(" ", "", output_file)
-	#write.table(data.frame(Genotypes),output_file,quote=FALSE,row.names=FALSE,col.names=FALSE,sep="")
+	# write.table(data.frame(Genotypes),output_file,quote=FALSE,row.names=FALSE,col.names=FALSE,sep="")
 	write.fasta(sequences=FASL,names=Seqnames, nbchar = 60, file.out="allele_database.fasta", open = "a")
 	}
 
